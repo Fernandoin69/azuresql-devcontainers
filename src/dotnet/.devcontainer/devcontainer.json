@@ -1,4 +1,4 @@
-// For format details, see https://aka.ms/devcontainer.json. 
+// For format details, see https://aka.ms/devcontainer.json.
 // For config options, see the README at: https://github.com/microsoft/azuresql-devcontainers/tree/main/src/dotnet
 {
 	"name": ".NET and Azure SQL",
@@ -9,14 +9,14 @@
 		// Configure properties specific to VS Code.
 		"vscode": {
 			// Set *default* container specific settings.json values on container create.
-			"settings": { 
+			"settings": {
 				"mssql.connections": [
 					{
 						"server": "localhost,1433",
 						"database": "master",
 						"authenticationType": "SqlLogin",
 						"user": "sa",
-						"password": "${env:MSSQL_SA_PASSWORD}",
+						"password": "${containerEnv:MSSQL_SA_PASSWORD}",
 						"savePassword": true,
 						"profileName": "LocalDev",
 						"trustServerCertificate": true
@@ -31,7 +31,6 @@
 				"ms-azuretools.vscode-bicep",
 				"ms-mssql.mssql",
 				"ms-azuretools.vscode-docker",
-				"github.copilot",
 				"github.codespaces"
 			]
 		}
@@ -40,24 +39,24 @@
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	"forwardPorts": [5000, 5001, 8000, 1433],
 
-    // Post create commands to run after the container is created.
-	"postCreateCommand": "bash .devcontainer/sql/postCreateCommand.sh 'database/Library/bin/Debug'",
+	// Lets task 4 trust the HTTPS development certificate for OpenSSL clients too. See https://aka.ms/dev-certs-trust.
+	"remoteEnv": {
+		"SSL_CERT_DIR": "/home/vscode/.aspnet/dev-certs/trust:/usr/lib/ssl/certs"
+	},
 
-	// Post start commands to run after the container is started.
+	// SqlPackage, as a .NET tool on PATH.
+	"onCreateCommand": "dotnet tool install --global microsoft.sqlpackage --version 170.5.76",
+
+	// Builds the SQL Database project and publishes it to SQL Server.
+	"postCreateCommand": "bash .devcontainer/sql/postCreateCommand.sh",
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	"features": {
 		"ghcr.io/devcontainers/features/azure-cli:1": {
-			"installBicep": true,
-			"installUsingPython": true,
-			"version": "latest"
+			"installBicep": true
 		},
-		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
-			"version": "latest"
-		},
-		"ghcr.io/azure/azure-dev/azd:latest": {
-			"version": "latest"
-		}
+		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
+		"ghcr.io/azure/azure-dev/azd:0": {}
 	}
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
 	// "remoteUser": "root"
